@@ -1,147 +1,262 @@
-# Firebase Task Manager
+# 📱 Firebase Task Manager
 
-Flutter + Firebase assignment app: authentication, Firestore task CRUD, FCM push notifications, and local notifications (including foreground handling).
+<p align="center">
+ <p align="center">
+  <img src="lib/Assets/ui.png" alt="Firebase Task Manager UI" width="100%">
+</p>
+</p>
 
-UI follows the provided Flutter Firebase Figma screens.
+<p align="center">
+  A Flutter-based Task Management App powered by Firebase, featuring secure authentication, real-time task management, push notifications, and local notifications.
+</p>
 
-## Features
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-Framework-02569B?logo=flutter" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-Language-0175C2?logo=dart" alt="Dart">
+  <img src="https://img.shields.io/badge/Firebase-Backend-FFCA28?logo=firebase" alt="Firebase">
+  <img src="https://img.shields.io/badge/Firestore-Database-FF6F00?logo=firebase" alt="Cloud Firestore">
+</p>
 
-- Email/password sign up and sign in
-- Google Sign-In
-- Password reset
-- Firestore task CRUD (title, description, due date, priority, completed, created date)
-- Task list with search and All / Pending / Completed filters
-- Delete confirmation sheet
-- FCM token saved on `users/{uid}`
-- Foreground FCM → local notification (`flutter_local_notifications`)
-- Background / terminated FCM shown by Firebase
-- Notification tap opens the related task when `taskId` is in the payload
-- Priority-colored notifications (high / medium / low)
+## ✨ Features
 
-## Package name
+- **Authentication:** Email/password sign-up, sign-in, Google Sign-In, and password reset.
+- **Task Management:** Create, view, update, and delete tasks using Cloud Firestore.
+- **Task Details:** Manage task titles, descriptions, due dates, priorities, and completion status.
+- **Search & Filters:** Search tasks and filter by All, Pending, or Completed.
+- **Delete Confirmation:** Confirmation sheet before deleting a task.
+- **Push Notifications:** Firebase Cloud Messaging (FCM) integration.
+- **Local Notifications:** Display notifications while the app is in the foreground.
+- **Background Notifications:** Receive Firebase notifications when the app is in the background or terminated.
+- **Notification Navigation:** Open the related task when a notification contains a valid `taskId`.
+- **Priority-Based Notifications:** Support for high, medium, and low task priorities.
+- **FCM Token Management:** Save the user's FCM token in Cloud Firestore.
 
-- Android: `com.assignment.firebase_task_manager`
-- iOS bundle id: `com.assignment.firebaseTaskManager`
+## 🛠️ Technologies
 
-## 1. Firebase setup
+- **Framework:** Flutter
+- **Programming Language:** Dart
+- **Authentication:** Firebase Authentication
+- **Database:** Cloud Firestore
+- **Push Notifications:** Firebase Cloud Messaging (FCM)
+- **Local Notifications:** `flutter_local_notifications`
+- **Google Authentication:** Google Sign-In
 
-1. Create a Firebase project.
-2. Enable **Authentication** → Email/Password and Google.
-3. Create a **Cloud Firestore** database (start in test mode, then paste `firestore.rules`).
-4. Enable **Cloud Messaging**.
-5. Add an Android app with package `com.assignment.firebase_task_manager`.
-6. Add the debug SHA-1 (required for Google Sign-In):
+## 📦 Package Information
+
+| Platform | Package Identifier |
+|---|---|
+| Android | `com.assignment.firebase_task_manager` |
+| iOS | `com.assignment.firebaseTaskManager` |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have installed:
+
+- Flutter SDK
+- Dart SDK
+- Android Studio or VS Code
+- A Firebase account
+- An Android emulator or physical device
+
+### 1. Clone the Repository
 
 ```bash
-cd android
-./gradlew signingReport
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd firebase-task-manager
 ```
 
-On Windows PowerShell:
+Replace `<YOUR_GITHUB_REPOSITORY_URL>` with your actual GitHub repository URL.
+
+### 2. Install Dependencies
+
+```bash
+flutter pub get
+```
+
+### 3. Configure Firebase
+
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
+2. Enable **Email/Password** and **Google** sign-in providers under Authentication.
+3. Create a Cloud Firestore database.
+4. Enable Firebase Cloud Messaging.
+5. Register the Android app using the package name:
+
+   `com.assignment.firebase_task_manager`
+
+6. Add your Firebase configuration using FlutterFire CLI.
+
+Install FlutterFire CLI:
+
+```bash
+dart pub global activate flutterfire_cli
+```
+
+Configure Firebase from the project root:
+
+```bash
+flutterfire configure
+```
+
+This generates or updates `lib/firebase_options.dart` and configures the applicable platform files.
+
+### 4. Configure Google Sign-In
+
+Generate the debug SHA-1 fingerprint.
+
+**Windows PowerShell:**
 
 ```powershell
 cd android
 .\gradlew signingReport
 ```
 
-Copy the `SHA1` under `Variant: debug` into Firebase → Project settings → your Android app.
-
-7. Generate FlutterFire files from the project root:
+**Git Bash / macOS / Linux:**
 
 ```bash
-dart pub global activate flutterfire_cli
-flutterfire configure
+cd android
+./gradlew signingReport
 ```
 
-This replaces `lib/firebase_options.dart`, `android/app/google-services.json`, and (for iOS) `ios/Runner/GoogleService-Info.plist`.
+Copy the debug SHA-1 fingerprint into your Android app settings in Firebase Console. Ensure that the updated `google-services.json` is included in the project.
 
-8. In Firestore, publish the rules from `firestore.rules`.
+### 5. Configure Firestore Rules
 
-9. Run:
+Publish the security rules provided in `firestore.rules` through the Firestore Rules section of Firebase Console.
+
+Use appropriate authenticated-user access rules before deploying the application. Avoid leaving the database publicly accessible in production.
+
+### 6. Run the Application
+
+Return to the project root and execute:
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-Until `flutterfire configure` is run, the app shows a **Connect Firebase** setup screen.
+## 🔐 Authentication
 
-## 2. Authentication
+The application supports:
 
-Login includes email, password, Sign In, Continue with Google, and Sign Up.
+- Email and password registration
+- Email and password login
+- Google Sign-In
+- Password reset
 
-Google Sign-In needs:
+Google Sign-In requires the Google provider to be enabled in Firebase Authentication, the correct SHA-1 fingerprint, and matching Firebase configuration.
 
-- Google provider enabled in Firebase Auth
-- SHA-1 on the Android app
-- Matching `google-services.json` from FlutterFire
+## 🗂️ Task Data Structure
 
-## 3. Task data
+Tasks are stored under the authenticated user's Firestore collection:
 
-Tasks live at:
-
-```
+```text
 users/{uid}/tasks/{taskId}
 ```
 
-Fields: `title`, `description`, `dueDate`, `priority`, `completed`, `createdAt`, `course`.
+Each task contains the following fields:
 
-The user's FCM token is stored at `users/{uid}.fcmToken`.
+| Field | Description |
+|---|---|
+| `title` | Task title |
+| `description` | Task description |
+| `dueDate` | Task due date |
+| `priority` | High, medium, or low |
+| `completed` | Task completion status |
+| `createdAt` | Task creation timestamp |
+| `course` | Optional course or category information |
 
-## 4. Push + local notifications
+The user's FCM token is stored in:
 
-### Foreground
-
-FCM does **not** show a system banner while the app is open. The app:
-
-1. Receives `FirebaseMessaging.onMessage`
-2. Reads title / body / `taskId` / `priority`
-3. Shows a **local notification** with `flutter_local_notifications`
-
-Creating a task also shows a local notification:
-
-- Title: `New Task`
-- Body: `You have a new task: {title}`
-
-### Background
-
-Send a message that includes a `notification` block. Android/iOS display it automatically.
-
-### Terminated
-
-`getInitialMessage()` (FCM) and local-notification launch details open the matching task.
-
-### Test from Firebase Console
-
-1. Run the app, sign in, then **Copy FCM token** from the task-list menu (or read `users/{uid}.fcmToken` in Firestore).
-2. Firebase Console → **Messaging** → **New campaign** → **Firebase Notification messages**.
-3. Use:
-
-- Title: `New Task`
-- Text: `You have a new task: Complete Flutter Assignment`
-- Additional custom data:
-  - `taskId` = a real task document id
-  - `priority` = `high` | `medium` | `low`
-
-4. Test:
-
-- App open → local notification appears
-- App in background → system notification from FCM
-- App killed → tap notification → task list / that task
-
-## 5. Notification click
-
-Payload `taskId` is passed as the local notification payload. Tapping it opens **Edit Task** for that document. If the id is missing, the task list opens.
-
-## Project structure
-
+```text
+users/{uid}
 ```
+
+Field: `fcmToken`
+
+## 🔔 Push & Local Notifications
+
+### Foreground Notifications
+
+When the app is open, Firebase Cloud Messaging delivers incoming messages through `FirebaseMessaging.onMessage`.
+
+The application uses `flutter_local_notifications` to display a local notification containing the available message details, such as title, body, task ID, and priority.
+
+Creating a task also triggers a local notification:
+
+- **Title:** New Task
+- **Body:** You have a new task: `{title}`
+
+### Background Notifications
+
+When the app is in the background, a Firebase message containing a `notification` payload can be displayed by the operating system.
+
+### Terminated-State Notifications
+
+The app handles notification launch information using Firebase's `getInitialMessage()` and local notification launch details, allowing navigation to the associated task when a valid `taskId` is available.
+
+### Test Notifications Using Firebase Console
+
+1. Run the app and sign in.
+2. Copy the FCM token from the task-list menu or retrieve `fcmToken` from Firestore.
+3. Open Firebase Console → **Messaging** and create a notification campaign.
+4. Set the notification title and body.
+
+Example:
+
+```text
+Title: New Task
+Body: You have a new task: Complete Flutter Assignment
+```
+
+Add the following custom data:
+
+```text
+taskId   = <EXISTING_TASK_DOCUMENT_ID>
+priority = high
+```
+
+Use an actual task document ID belonging to the signed-in user when testing task navigation.
+
+Test the notification in these states:
+
+- **Foreground:** A local notification should appear if foreground handling is configured correctly.
+- **Background:** The system should display the Firebase notification.
+- **Terminated:** Tapping the notification should open the relevant task when the payload and navigation handling are configured correctly.
+
+### Notification Click Handling
+
+The notification payload may include `taskId`.
+
+- When a valid task ID is provided, the application navigates to the associated task's edit screen.
+- When the task ID is missing, the application opens the task list.
+
+## 📁 Project Structure
+
+```text
 lib/
-  main.dart
-  firebase_options.dart
-  core/
-  models/
-  services/
-  screens/
-  widgets/
+├── main.dart
+├── firebase_options.dart
+├── core/
+├── models/
+├── services/
+├── screens/
+└── widgets/
+
+firestore.rules
+pubspec.yaml
+README.md
+ui.png
 ```
+
+## 👩‍💻 Author
+
+**Hafiza Shadaf Rimi**
+
+Flutter Developer | Computer Science & Engineering
+
+## 📚 Assignment
+
+**Flutter + Firebase Task Manager**
+
