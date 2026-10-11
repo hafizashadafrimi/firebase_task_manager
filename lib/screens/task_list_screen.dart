@@ -167,7 +167,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       PopupMenuButton<String>(
                         onSelected: (value) async {
                           if (value == 'logout') {
-                            AuthService.instance.signOut();
+                            await AuthService.instance.signOut();
                           } else if (value == 'token') {
                             final token =
                                 await NotificationService.instance.getToken();

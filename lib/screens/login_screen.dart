@@ -189,11 +189,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: AppColors.label),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        final created = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(builder: (_) => const SignupScreen()),
                         );
+                        if (created == true && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Account created. Please sign in.'),
+                            ),
+                          );
+                        }
                       },
                       child: const Text(
                         'Sign Up',

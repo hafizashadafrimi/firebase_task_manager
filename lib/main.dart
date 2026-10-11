@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +30,14 @@ Future<void> main() async {
   }
 
   await Firebase.initializeApp(options: options);
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+  );
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await NotificationService.instance.initialize();
-  await AuthService.instance.persistUserToken();
+  unawaited(AuthService.instance.saveUserProfile());
   FirebaseMessaging.instance.onTokenRefresh.listen((_) {
-    AuthService.instance.persistUserToken();
+    AuthService.instance.saveUserProfile();
   });
 
   runApp(const FirebaseTaskApp(ready: true));
@@ -66,31 +73,41 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   bool _showSplash = true;
+  bool _authReady = false;
+  User? _user;
+  StreamSubscription<User?>? _authSub;
 
   @override
   void initState() {
     super.initState();
+    _user = AuthService.instance.currentUser;
+    _authSub = AuthService.instance.authState.listen((user) {
+      if (!mounted) return;
+      setState(() {
+        _user = user;
+        _authReady = true;
+      });
+    });
     Future<void>.delayed(const Duration(milliseconds: 1400), () {
       if (mounted) setState(() => _showSplash = false);
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_showSplash) return const SplashScreen();
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
 
-    return StreamBuilder(
-      stream: AuthService.instance.authState(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SplashScreen();
-        }
-        if (snapshot.data == null) {
-          return const LoginScreen();
-        }
-        AuthService.instance.persistUserToken();
-        return const TaskListScreen();
-      },
-    );
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash || !_authReady && _user == null) {
+      return const SplashScreen();
+    }
+
+    if (_user == null || AuthService.instance.suppressAuthNavigation) {
+      return const LoginScreen(key: ValueKey('login'));
+    }
+    return const TaskListScreen(key: ValueKey('tasks'));
   }
 }

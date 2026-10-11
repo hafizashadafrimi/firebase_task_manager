@@ -33,7 +33,7 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _loading = true);
     try {
       await AuthService.instance.signUpWithEmail(_email.text, _password.text);
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context, true);
     } on FirebaseAuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
